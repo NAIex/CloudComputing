@@ -66,6 +66,10 @@ class Users(Resource):
         if self.path.__len__() == 1:
             user_id = int(self.path[0])
             
+            if not self.data["form_data"].__contains__("password"):
+                self.response(Resource.BAD_REQUEST, "Cant set new password if old password is missing!")
+                return
+
             password = self.data["form_data"]["password"]
             
             db = self.get_db()

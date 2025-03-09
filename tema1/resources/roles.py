@@ -36,7 +36,7 @@ class Roles(Resource):
             self.succes_response(message=message)
         else:
             message = "Target role already exists!"
-            self.response(Resource.FORBIDDEN,message=message)
+            self.response(Resource.CONFLICT,message=message)
 
     def do_DELETE(self):
 
@@ -52,7 +52,7 @@ class Roles(Resource):
                 db.delete_from_where_op("Roles",{"id":role_id}).execute_and_commit_op()
                 self.succes_response("Succesfully deleted role.")
         else:
-            self.response(Resource.FORBIDDEN, "Cannot delete collection, lol.")
+            self.response(Resource.METHOD_NOT_ALLOWERD, "Cannot delete collection, lol.")
 
     def do_PUT(self):
         response = {}

@@ -13,6 +13,8 @@ class Resource:
     UNAUTHORIZED = 401
     FORBIDDEN = 403
     NOT_FOUND = 404
+    METHOD_NOT_ALLOWERD = 405
+    CONFLICT = 409
 
 
     def __init__(self, req_handler : BaseHTTPRequestHandler, command,data):
