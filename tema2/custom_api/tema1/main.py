@@ -71,7 +71,7 @@ if __name__ == "__main__":
         cur.execute('CREATE TABLE Employees(id INTEGER PRIMARY KEY, name TEXT, role_id INTEGER);')
         cur.execute('CREATE TABLE Roles(id INTEGER PRIMARY KEY, name TEXT, description TEXT);')
 
-        cur.execute('CREATE TABLE Schedules(id INTEGER PRIMARY KEY, name TEXT, local_url TEXT)')
+        cur.execute('CREATE TABLE Schedules(id INTEGER PRIMARY KEY, name TEXT, local_url TEXT);')
 
         cur.close()
 
