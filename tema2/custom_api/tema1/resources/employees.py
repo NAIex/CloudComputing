@@ -1,5 +1,7 @@
 from resources.resource import Resource
 
+from classes.scheduleJSON import ScheduleJSON
+
 class Employees(Resource):
     def __init__(self, req_handler, command, data):
         super().__init__(req_handler, command, data)
@@ -35,7 +37,10 @@ class Employees(Resource):
         if data.__len__() == 0 and has_role.__len__() != 0:
             db.insert_operation(["name","role_id"],[name,role_id],"Employees")
             message = "New employee added succesfully!"
+            ScheduleJSON(name.lower().replace(' ','/'))
+
             self.succes_response(message=message)
+            
         elif data.__len__() != 0:
             message = "Target role already exists!"
             self.response(Resource.CONFLICT,message=message)

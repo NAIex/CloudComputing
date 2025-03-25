@@ -49,7 +49,7 @@ def protected():
     user = get_jwt_identity()
     return jsonify({"message":f"Welcome {user}"})
 
-@app.route("/employees",methods=["GET" , "POST"])
+@app.route("/employees",methods=["GET" , "POST", "DELETE"])
 def employees():
     url = "http://localhost:8000/employees"
 
@@ -59,11 +59,17 @@ def employees():
         return jsonify(data)
     elif request.method == "POST":
         data = request.get_json()
-        print(data)
-        response = requests.post(url,data=data)
+        
+        response = requests.post(url,files=data)
         data = response.json()
-
         return jsonify(data)
+    elif request.method == "DELETE":
+        data = request.get_json()
+        print(data)
+        response = requests.delete(url+f'/{data['id']}')
+        return jsonify(response.json())
+        
+        
 
 
 

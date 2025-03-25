@@ -1,12 +1,15 @@
 import { useState } from "react"; 
 import { useEffect } from "react";
 
-import BACKEND from "./Constants"
+import {BACKEND} from "./Constants"
 
 import React from "react";
 import { Container, Row, Col, Navbar, Nav, Card, Form, FormGroup, Button } from "react-bootstrap";
 import { FaChartPie, FaUsers, FaCog } from "react-icons/fa";
 import "bootstrap/dist/css/bootstrap.min.css";
+
+
+import JokeGenerator  from "./JokeGenerator"
 
 function HEADERS_AUTHORIZED(token){
     return {
@@ -15,12 +18,18 @@ function HEADERS_AUTHORIZED(token){
     }
 }
 const Dashboard = () => {
+    const [employees, setEmployees] = useState([])
+
     const [name, setName] = useState()
+    const [id, setID] = useState()
+    
     const token = localStorage.getItem('token')
 
-    const [employees, setEmployees] = useState([])
     
-    const [addingEmployee, setAddingEmployee] = useState(false)
+    const new_employee = "NEW"
+    const old_employee = "OLD"
+
+    const [visualize, setVisualize] = useState('')
 
     const getEmployees = async() => {
         const result = await fetch(`${BACKEND}/employees`,{
@@ -40,16 +49,25 @@ const Dashboard = () => {
 
         const data = await result.json()
         console.log(data)
-
-
     }
+    const removeEmployee = async() => {
+        const result = await fetch(`${BACKEND}/employees`, {
+            method:"DELETE",
+            headers:HEADERS_AUTHORIZED(token),
+            body:JSON.stringify({"id":id})
+        })
+        const data = await result.json()
+        console.log(data)
+    }
+    
 
-    const changeEmployee = async(name) => {
+    const changeEmployee = async(name, id) => {
         setName(name)
-        setAddingEmployee(false)
+        setID(id)
+        setVisualize(old_employee)
     }
     const addEmployee = async() => {
-        setAddingEmployee(true)
+        setVisualize(new_employee)
     }
 
 
@@ -61,15 +79,17 @@ const Dashboard = () => {
   return (
     <div className="d-flex">
       {/* Sidebar */}
-      <div className="bg-dark text-white p-3 vh-100" style={{ width: "250px" }}>
-        <h4 className="text-center"><FaUsers/> Users</h4>
-        <Nav className="flex-column" style={{alignItems:"center"}}>
+      <div className="bg-dark text-white p-3 min-vh-90" style={{ width: "250px" }}>
+        <h4 className="text-center"><FaUsers/> Employees</h4>
+        <Nav className="d-flex flex-column vh-100" style={{alignItems:"center"}}>
         {
             employees.map((employee) => (
-            <Nav.Link onClick={() => changeEmployee(employee.name)}>{employee.name}</Nav.Link>
+            <Nav.Link onClick={() => changeEmployee(employee.name,employee.id)}>{employee.name}</Nav.Link>
             ))
         }
         <Nav.Link onClick={() => addEmployee()}>Add Employee</Nav.Link>
+        <Button className="mt-auto" variant="success">Generate Schedule</Button>
+        
         </Nav>
       </div>
 
@@ -77,14 +97,14 @@ const Dashboard = () => {
       <div className="flex-grow-1">
         <Navbar bg="light" className="mb-3">
           <Container>
-            <Navbar.Brand>User DashBoard</Navbar.Brand>
+            <Navbar.Brand>Employee DashBoard</Navbar.Brand>
           </Container>
         </Navbar>
 
-        <Container className="d-flex flex-column">
+        <Container className="d-flex flex-column min-vh-100">
           <Row className="g-4">
             {
-            addingEmployee ? 
+            visualize === new_employee ? 
             <Col md={4}>
                 <Form>
                     <FormGroup>
@@ -96,16 +116,32 @@ const Dashboard = () => {
             <Col><h3>{name}</h3></Col>
             }
           </Row>
-          <Row className="mt-auto align-items-end g-4">
+          {/* Schedule visualizer */}
+          <Row></Row>
+
+          {/* Buttons */}
+          <Row className="align-items-end g-4">
             {
-                addingEmployee && 
+                visualize === new_employee && 
+                <>
                 <Col md={4}>
                     <Form>
-                        <Button onClick={addNewEmployee}>Save</Button>
+                        <Button className="btn-success" onClick={addNewEmployee}>Save</Button>
+                    </Form>
+                </Col>
+                </>
+                
+            }
+            {
+                visualize === old_employee &&
+                <Col md={4}>
+                    <Form>
+                        <Button className="btn-danger" onClick={removeEmployee}>Remove</Button>
                     </Form>
                 </Col>
             }
           </Row>
+            <JokeGenerator/>
         </Container>
       </div>
     </div>

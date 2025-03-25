@@ -32,7 +32,7 @@ class SimpleHTTPRequestHandler(BaseHTTPRequestHandler):
         if self.command in {"POST", "PUT"}:
             length = int(self.headers.get('Content-Length'))
             raw_data = self.rfile.read(length).decode('utf-8')
-            print(raw_data)
+            print(f'Raw data: {raw_data}')
             form_data = re.findall('name=\"([\\w]+)\"[\\s]+([^\\r]+)',raw_data)
             print(f"Filtered data:{form_data}")
             form_data = {pair[0] : pair[1]for pair in form_data}

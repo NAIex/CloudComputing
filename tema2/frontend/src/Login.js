@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 
 import './App.css'
 import 'bootstrap/dist/css/bootstrap.min.css'
-import {Button, Alert, Form} from 'react-bootstrap'
+import {Button, Alert, Form, Container, Row, Col} from 'react-bootstrap'
 
 const Login = () => {
     const [username, setUsername] = useState("")
@@ -35,13 +35,13 @@ const Login = () => {
             <div className="App-header">
                 <Form>
                     <Form.Label>Login Information</Form.Label>
-                    <Form.Group>
+                    <Form.Group className="mt-2">
                         <Form.Control type='text' placeholder='MyUsername' onChange={(e) => setUsername(e.target.value)}/>
                     </Form.Group>
-                    <Form.Group>
+                    <Form.Group className="mt-2">
                         <Form.Control type='password' onChange={(e) => setPassword(e.target.value)}/>
                     </Form.Group>
-                    <Button type="button" onClick={handleLogin}>Login</Button>
+                    <Button className="mt-2" type="button" onClick={handleLogin}>Login</Button>
                 </Form>
                 {
                     loginState === 0 && 
