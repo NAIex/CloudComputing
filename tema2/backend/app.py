@@ -76,7 +76,7 @@ def employees():
     
 
 
-@app.route("/employees/<id>",methods=["GET","PUT"])
+@app.route("/employees/<id>",methods=["GET","PUT","DELETE"])
 @jwt_required()
 def employee(id):
     if request.method == "GET":
@@ -91,8 +91,15 @@ def employee(id):
         }
         response = requests.put(EMPLOYEE_URL+f"employees/{id}",json=data,headers=headers)
         data = response.json()
-
         return data, 200
+    elif request.method == "DELETE":
+        headers = {
+        'Content-Type' : 'application/json'
+        }
+        response = requests.delete(EMPLOYEE_URL+f"employees/{id}",headers=headers)
+        data = response.json()
+        return data, 200
+
 
 @app.route("/email", methods=["POST"])
 @jwt_required()
