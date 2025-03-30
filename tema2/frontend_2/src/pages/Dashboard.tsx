@@ -3,9 +3,13 @@ import { Button, Col, Container, FormControl, InputGroup, ListGroup, ListGroupIt
 
 import 'bootstrap/dist/css/bootstrap.min.css'
 import JokeGenerator from '../components/JokeGenerator'
+import { Navigate, redirect, useNavigate } from 'react-router-dom'
 
 const Dashboard = () => {
+    const navigate = useNavigate();
+    
     var token = localStorage.getItem('token');
+
     async function fetchEmployees(){
         let response = await fetch('http://127.0.0.1:5000/employees',{
             method:"GET",
@@ -28,7 +32,7 @@ const Dashboard = () => {
                 "Content-Type":"application/json",
                 "Authorization":`Bearer ${token}`
             },
-            body: JSON.stringify({"name":chosenEmployee})
+            body: JSON.stringify({"name":chosenEmployee, "email":chosenEmail})
         })
         let data = await response.json()
         fetchEmployees()
@@ -45,6 +49,9 @@ const Dashboard = () => {
     }
 
     async function fetchEmployeeData(id:number){
+
+        setChosenSchedule(schedule)
+
         let response = await fetch(`http://127.0.0.1:5000/employees/${id}`,{
             method: "GET",
             headers:{
@@ -81,6 +88,7 @@ const Dashboard = () => {
     const [selectedEmployee, setSelectedEmployee] = useState(-1)
     
     const [chosenEmployee, setChosenEmployee] = useState('')
+    const [chosenEmail, setChosenEmail] = useState('')
     const [chosenEmployeeId, setChosenEmployeeID] = useState(-1)
     const viewingEmployee = chosenEmployee !== ''
     const schedule = {
@@ -96,11 +104,12 @@ const Dashboard = () => {
 
     const [isAdding, setIsAdding] = useState(false)
 
-    function displayData(d:number, name:string ,id:number){
+    function displayData(d:number, name:string, email:string ,id:number){
         fetchEmployeeData(id)
         
         setSelectedEmployee(d)
         setChosenEmployee(name)
+        setChosenEmail(email)
         setChosenEmployeeID(id)
         setIsAdding(false)
     }
@@ -131,6 +140,7 @@ const Dashboard = () => {
 
 
   return (
+    token == null ? <Navigate to={"/"} replace/> :
     <Container className="vh-100 vw-100 m-0">
         <Row className='vh-100'>
             <Col md="2" className='bg-info pt-5 px-2'>
@@ -143,7 +153,7 @@ const Dashboard = () => {
                         onClick={(event) => 
                             index == employees.length-1
                             ? addNewData(index)
-                            :displayData(index,event.currentTarget.innerHTML, e.id)}>{e.name}</ListGroupItem>
+                            :displayData(index,event.currentTarget.innerHTML,e.email, e.id)}>{e.name}</ListGroupItem>
                         )}                          
                 </ListGroup>
                 <Button className='mt-5'>Generate Schedule</Button>
@@ -157,6 +167,7 @@ const Dashboard = () => {
                     <Row className='md-2'>
                         <Col md="6">
                             {isAdding ?<FormControl onChange={(event) => setChosenEmployee(event.target.value)} className='mt-2 pt-2' type='text' placeholder='name'></FormControl>  : <h3 className='mt-2 pt-2'>{chosenEmployee}</h3>}
+                            {isAdding ?<FormControl onChange={(event) => setChosenEmail(event.target.value)} className='mt-2 pt-2' type='email' placeholder='email@email.com'></FormControl>  : <h5 className='mt-2 pt-2'>{chosenEmail != null ? chosenEmail : 'none'}</h5>}
                         </Col>
                         <Container className={isAdding ? "invisible pe-none" : ""}>
                             <Row className='text-center mb-3'>

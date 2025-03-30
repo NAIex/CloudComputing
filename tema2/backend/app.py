@@ -13,23 +13,30 @@ jwt = JWTManager(app)
 
 CORS(app)
 
+EMAIL_URL = "http://127.0.0.1:5002/"
+AUTH_URL = "http://127.0.0.1:5001/"
+EMPLOYEE_URL = "http://localhost:8000/"
+
 
 @app.route("/login", methods=["POST"])
 def login():
-    url = "http://127.0.0.1:5001/login"
+    try:
+        data = request.get_json()
+        data['jwt_key'] = app.config["JWT_SECRET_KEY"]
 
-    data = request.get_json()
-    data['jwt_key'] = app.config["JWT_SECRET_KEY"]
+        headers = {
+            'Content-Type' : 'application/json'
+        }
 
-    headers = {
-        'Content-Type' : 'application/json'
-    }
+        response = requests.post(AUTH_URL+'login',json=data, headers=headers)
+        data = response.json()
+        code = response.status_code
+        return jsonify(data), code    
+    except requests.ConnectionError:
+        return jsonify({"message":"Service is down!"}), 500
 
-    response = requests.post(url,json=data, headers=headers)
-    data = response.json()
-    code = response.status_code
 
-    return jsonify(data), code    
+
 
 @app.route("/joke", methods =["GET"])
 @jwt_required()
@@ -50,19 +57,22 @@ def joke():
 @app.route("/employees",methods=["GET", "POST"])
 @jwt_required()
 def employees():
-    if request.method == "GET":
-        response = requests.get('http://localhost:8000/employees')
-        data = response.json()
-        data = data['data']
+    try:
+        if request.method == "GET":
+            response = requests.get(EMPLOYEE_URL+'employees')
+            data = response.json()
+            data = data['data']
 
-        return data, 200
-    elif request.method == "POST":
-        data = request.get_json()
-        data["role_id"] = 1
-        print(data)
-        response = requests.post('http://localhost:8000/employees',files=data)
-        
-        return data, 200
+            return data, 200
+        elif request.method == "POST":
+            data = request.get_json()
+            data["role_id"] = 1
+            print(data)
+            response = requests.post(EMPLOYEE_URL+'employees',files=data)
+            
+            return data, 200
+    except requests.ConnectionError:
+        return jsonify({"message":"Service is down!"}), 500
     
 
 
@@ -70,7 +80,7 @@ def employees():
 @jwt_required()
 def employee(id):
     if request.method == "GET":
-        response = requests.get(f"http://localhost:8000/employees/{id}")
+        response = requests.get(EMPLOYEE_URL+f"employees/{id}")
         data = response.json()
 
         return data, 200
@@ -79,29 +89,57 @@ def employee(id):
         headers = {
         'Content-Type' : 'application/json'
         }
-        response = requests.put(f"http://localhost:8000/employees/{id}",json=data,headers=headers)
+        response = requests.put(EMPLOYEE_URL+f"employees/{id}",json=data,headers=headers)
         data = response.json()
 
         return data, 200
 
 @app.route("/email", methods=["POST"])
 @jwt_required()
-def email():
-    url = "http://127.0.0.1:5002/send-email"
-
+def email():    
     data = {}
 
-    data["to"] = "alexneagubiz@gmail.com"
-    data["subject"] = "Hello"
-    data["message"] = "I am virus."
+    # Getting all the not NULL emails
+    response = requests.get(EMPLOYEE_URL+'employees')
+    
+    employee_data = response.json()['data']
 
+    emails = list(filter(lambda x: x[1] != None,[(employee['name'].lower(),employee['email'],employee['id']) for employee in employee_data]))
+    
+    days  = ['monday','tuesday','wendsday', 'thursday','friday','saturday','sunday']
 
-    if request.method == "POST":
-        response = requests.post(url,json=data)
-        print(response.json())
-        return jsonify({"message":response.json()})
+    for name, email, id in emails:
+        response = requests.get(EMPLOYEE_URL+f"employees/{id}")
+        data = response.json()['data'][0]
+        schedule = data['schedule']
+
+        program = ""
+        for day in days:
+            first_interval = schedule[day]['0']
+            second_interval = schedule[day]['1']
+
+            program += f'{day.capitalize()}: '
+            program += 'You will work in ' if (first_interval or second_interval) else 'You will be free.'
+            program += 'the first interval ' if first_interval else ''
+            program += 'and the second interval.' if (second_interval and first_interval) else ''
+            program += 'the second interval.' if (second_interval and not first_interval) else ''
+            
+            program += '\n'
+
+        data['to'] = email
+        data["subject"] = f"Genering Company Name | Your schedule for the next week"
+        data["message"] = \
+        f'Dear {str.capitalize(name)},\n\n' + \
+        'Your schedule for the next week is the following:\n\n' + program
+
+        try:
+            response = requests.post(EMAIL_URL+'send-email',json=data)        
+        except requests.ConnectionError:
+            return jsonify({"message":"Service is down."}) , 500
         
-    pass
+
+    return jsonify({"message":"ok"}), 200
+
 
 
 if __name__== "__main__":

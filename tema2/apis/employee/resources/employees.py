@@ -23,19 +23,20 @@ class Employees(Resource):
         
     def do_POST(self):
         
-        if not self.data["form_data"].__contains__("name") or not self.data["form_data"].__contains__("role_id"):
+        if not self.data["form_data"].__contains__("name") or not self.data["form_data"].__contains__("role_id") or not self.data["form_data"].__contains__("email"):
             self.response(Resource.BAD_REQUEST, "Missing either user name or role_id in order to create it!")
             return
 
         name     = self.data["form_data"]["name"]
         role_id = self.data["form_data"]["role_id"]
+        email = self.data["form_data"]["email"]
 
 
         db = self.get_db()
         data = db.select_op(["name"]).from_op("Employees").where_op({"name":name}).execute_and_fetch_op()
         has_role = db.select_op(["id"]).from_op("Roles").where_op({"id":role_id}).execute_and_fetch_op()
         if data.__len__() == 0 and has_role.__len__() != 0:
-            db.insert_operation(["name","role_id"],[name,role_id],"Employees")
+            db.insert_operation(["name","role_id","email"],[name,role_id,email],"Employees")
             message = "New employee added succesfully!"
             ScheduleJSON(name.lower().replace(' ','/'))
 
