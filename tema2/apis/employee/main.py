@@ -36,7 +36,12 @@ class SimpleHTTPRequestHandler(BaseHTTPRequestHandler):
             form_data = re.findall('name=\"([\\w]+)\"[\\s]+([^\\r]+)',raw_data)
             print(f"Filtered data:{form_data}")
             form_data = {pair[0] : pair[1]for pair in form_data}
-            data["form_data"] = form_data
+            if self.headers.get('Content-Type') == 'application/json':
+                data["form_data"] = json.decoder.JSONDecoder().decode(raw_data)
+                pass
+            else:
+                data["form_data"] = form_data
+                
 
         if has_resource:
             c = globals()[resource_name.capitalize()](self,self.command, data)

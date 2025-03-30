@@ -12,11 +12,11 @@ class Employees(Resource):
     def do_GET(self):    
         if self.path.__len__() > 0:
             employee_id = self.path[0]
-
             data = self.get_db().select_op(["id","name","role_id"]).from_op("Employees").where_op({"id":employee_id}).execute_and_fetch_op()
+            data[0]['schedule'] = ScheduleJSON(f'{data[0]['name'].lower()}').data
 
         else:
-            data = self.get_db().select_op(["id","name"]).from_op("Employees").execute_and_fetch_op()      
+            data = self.get_db().select_op(["id","name","email"]).from_op("Employees").execute_and_fetch_op()      
 
         message = "Employee data succesfully fetched!"
         self.succes_response(message=message,data={"data":data})
@@ -71,16 +71,19 @@ class Employees(Resource):
         if self.path.__len__() == 1:
             employee_id = int(self.path[0])
             
-            role_id = self.data["form_data"]["role_id"]
+            schedule = self.data["form_data"]["schedule"]
             
             db = self.get_db()
-            data = db.select_op(["id"]).from_op("Roles").where_op({"id":role_id}).execute_and_fetch_op()
+            data = db.select_op(["name"]).from_op("Employees").where_op({"id":employee_id}).execute_and_fetch_op()
 
             if data.__len__() == 0:
-                self.response(Resource.NO_CONTENT, "Role with target ID does not exist!")
+                self.response(Resource.NO_CONTENT, "Employee with target ID does not exist!")
                 pass
             else:
-                db.update_op("Employees").set_op({"role_id":role_id}).where_op({"id":employee_id}).execute_and_commit_op()
+                sched = ScheduleJSON(data[0]['name'].lower())
+                sched.data = schedule
+                sched.save()
+                
                 self.succes_response("Succesfully updated employee!")
         else:
             self.not_implemented_response()

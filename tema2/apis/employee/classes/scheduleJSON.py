@@ -12,8 +12,8 @@ class ScheduleJSON:
             pass
         else:
             i = {}
-            i[0] = {}
-            i[1] = {}
+            i[0] = False
+            i[1] = False
             self.data = {}
 
             for s in {"monday","tuesday","wendsday","thursday","friday","saturday","sunday"}:

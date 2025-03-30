@@ -3,6 +3,7 @@ import Login from "./Login";
 import Dashboard from "./Dashboard"
 
 import './App.css'  
+import Managing from "./Managing";
 
 export default function MyApp() {
   return (
@@ -11,7 +12,7 @@ export default function MyApp() {
         <Route path="/" element={<Login/>}/>
         <Route path="/dashboard" element={
           <div>
-            <Dashboard/>
+            <Managing/>
           </div>
         }/>
       </Routes>

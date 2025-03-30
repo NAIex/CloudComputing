@@ -10,6 +10,7 @@ import "bootstrap/dist/css/bootstrap.min.css";
 
 
 import JokeGenerator  from "./JokeGenerator"
+import Week from "./Week";
 
 function HEADERS_AUTHORIZED(token){
     return {
@@ -117,7 +118,7 @@ const Dashboard = () => {
             }
           </Row>
           {/* Schedule visualizer */}
-          <Row></Row>
+          {visualize === old_employee && <Week></Week>}
 
           {/* Buttons */}
           <Row className="align-items-end g-4">
